@@ -1,0 +1,30 @@
+import string
+
+from exercise_2 import CubeCipher, mse
+
+
+def test_encrypt_decrypt_inverse():
+    cube = CubeCipher('KKCVNCQDEPZJCPRHQUFRDQJWKMWHFIJHLACXZNBKDNZZEQHSXOFGUR')
+    encrypted = 'WVDYN E AZWAVI PELTKP (HYH JYYAUQA QYTJV VP AWRW ZYVI ZW DKW) HTUHDGWZQN KRS JFYKQQCLUQ EQFXA SR IYH JRMBEHF MPDJH HLSKV KLB: XWVQ, ZKCXEJ AY LTIVLVJ IYLZ SW QZOS, CLT XDCO SCV VOKVE BLJU, ECU ZHSXTU WV CIT NKHD ADLOK REEGHU XIMK.  WOO JXIVA DLXEJ ZRI WVDYN APJ D NORTIDS MLDIXZ YJ IYHYO KDVV ISPA! KKLX XWV UHLFXKV CYMRV DSYRV--TDAML WZP, FYY QP WOO LTUJL! DLTE VPVICTH, HXH IYHU KRDKKLB GDEIBCMDE RM FSXTHZ--RSAU XW RMH YHHN--FGRQKI RDN--GVXX RYRRO LXD--KVG APJ LA, YPS WHSVSL? NKHD LPGSLXIS KR FYY? IVOS EW PCO HLSJK LA!  VEHK FHWI P CLADPT WHLLPT, JTBOEZZQN FSXTH, (AREIJ EPVP, IYRBQLI ROPMI,) LVOS, S LPIGSI OCFZ--UY QDIH, ARECB BL; SQ QVWAOV CFZ--IEX XD D KOEA KRV PPJJWLBIS KR AOPA PRB--KPA Z NUYA XJ, VVWIIYLUQ GDDHZ KX BV OPUI P ADJU-MC-KKL-LSM, RQK ET X XRLC PXBH H CON-IRJUII!  JR FYY SZG, VVH UVOSYA! HRLK DLT FWOOVH.  NH TEWI SXYX XWV KVEWT URDX! WPZG ARI GREISXH MRPMI; PEG HVMRV FHVPTU RBD EH CRBN EH JKL MSJCG, PP CDL GV. SPA JHA NMCRK HD CDL!  WOOVT NDZ K HTRG ZSPTEFL SRHKDUDPN, RQK KPXTH ARSJXKA DS WVUZOPU, Z ZVXHTI ZOKX IYHF GMAC GV XIMK! LM DLTP KHN ECP VLXWT, KKLIH IRNL DLT IRVP SUW. DMDIG R PPXYIV RY DAD, KKLI FTXDU WSKZQN KFDLW HQEXE, DUN EAZFL RIPIG ARI GREISX HRB, H LEGI'
+
+    assert cube.encrypt(cube.decrypt(encrypted)) == encrypted
+
+def test_mse():
+    all_zero = dict((c, 0) for c in string.ascii_uppercase)
+    all_ones = dict((c, 1) for c in string.ascii_uppercase)
+    
+    assert mse(all_zero, all_zero) == 0.0
+    assert mse(all_ones, all_zero) == 1.0
+    assert mse(all_zero, all_ones) == 1.0
+    assert mse(all_ones, all_ones) == 0.0
+
+def test_from_key():
+    key = "ABCDEFGHIJKL"
+    cube = CubeCipher.from_key(key)
+
+    assert cube.get_key() == key
+
+if __name__ == "__main__":
+    test_encrypt_decrypt_inverse()
+    test_mse()
+    test_from_key()
