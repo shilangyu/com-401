@@ -103,6 +103,21 @@ class CubeCipher:
     def decrypt(self, encrypted: str) -> str:
         return self._map_through_sexy_move(encrypted, lambda s, k: chr((ord(s) - ord(k)) % 26 + ord('A')))
     
+    def decrypt_fast(self, encrypted: str) -> str:
+        """
+        Runs a much faster equivalent algorithm to decrypt.
+        """
+        output = ''
+        key = self.get_key()
+        key_index = 0
+        for i in range(len(encrypted)):
+            if CubeCipher.is_encryptable(encrypted[i]):
+                output += chr((ord(encrypted[i]) - ord(key[key_index])) % 26 + ord('A'))
+                key_index = (key_index + 1) % len(key)
+            else:
+                output += encrypted[i]
+        return output
+    
 def mse(xs: dict[str, float], ys: dict[str, float]) -> float:
     return 1/len(xs) * sum((xs[c] - ys[c]) ** 2 for c in string.ascii_uppercase)
 
@@ -174,7 +189,7 @@ def break_cipher(encrypted: str) -> CubeCipher:
         for c in string.ascii_uppercase:
             # try a seed of all c characters
             cube = CubeCipher.from_key(c * CubeCipher.key_length)
-            chars = cube.decrypt(letters)
+            chars = cube.decrypt_fast(letters)
             freqs = Counter(chars)
             
             error = mse(eng_freq, dict((c, freqs.get(c, 0) / len(chars)) for c in string.ascii_uppercase))
