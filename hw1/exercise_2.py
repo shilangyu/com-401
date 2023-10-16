@@ -32,6 +32,15 @@ class CubeCipher:
         assert len(s) == 1
         return s in string.ascii_uppercase
     
+    @staticmethod
+    def caesar_shift(c: str, k: str, sign: int = 1) -> str:
+        """
+        Performs a caesar shift on a single character given a key.
+        """
+        assert len(c) == 1
+        assert len(k) == 1
+        return chr((ord(c) + sign * ord(k)) % 26 + ord('A'))
+    
     def get_key(self) -> str:
         """
         Simulates moves of the cube to retrieve the key.
@@ -98,10 +107,10 @@ class CubeCipher:
         return output
 
     def encrypt(self, m: str) -> str:
-        return self._map_through_sexy_move(m, lambda s, k: chr((ord(s) + ord(k)) % 26 + ord('A')))
+        return self._map_through_sexy_move(m, CubeCipher.caesar_shift)
     
     def decrypt(self, encrypted: str) -> str:
-        return self._map_through_sexy_move(encrypted, lambda s, k: chr((ord(s) - ord(k)) % 26 + ord('A')))
+        return self._map_through_sexy_move(encrypted, lambda s, k: CubeCipher.caesar_shift(s, k, sign=-1))
     
     def decrypt_fast(self, encrypted: str) -> str:
         """
@@ -112,7 +121,7 @@ class CubeCipher:
         key_index = 0
         for i in range(len(encrypted)):
             if CubeCipher.is_encryptable(encrypted[i]):
-                output += chr((ord(encrypted[i]) - ord(key[key_index])) % 26 + ord('A'))
+                output += CubeCipher.caesar_shift(encrypted[i], key[key_index], sign=-1)
                 key_index = (key_index + 1) % len(key)
             else:
                 output += encrypted[i]
@@ -170,20 +179,25 @@ def break_cipher(encrypted: str) -> CubeCipher:
         'Z': 0.0007,
     }
 
+
+
+    # list of strings formed from characters such that pos = n (mod 6) characters
+    quo_group = []
+    # fill in initial data
+    for _ in range(CubeCipher.key_length):
+        quo_group.append('')
+    
+    # collect letters
+    key_index = 0
+    for i in range(len(encrypted)):
+        if CubeCipher.is_encryptable(encrypted[i]):
+            quo_group[key_index] += encrypted[i]
+            key_index = (key_index + 1) % CubeCipher.key_length
+
     key = ''
 
-    for n in range(CubeCipher.key_length):
-        # collect pos = n (mod 6) characters
-        letters = ''
-        i = n
-        while i < len(encrypted):
-            # skip non encryptable
-            while i < len(encrypted) and not CubeCipher.is_encryptable(encrypted[i]):
-                i += 1
-            if i < len(encrypted):
-                letters += encrypted[i]
-                i += CubeCipher.key_length
-        
+    # we break each key character one by one
+    for letters in quo_group:
         # max value of mse is 1, so we pick 2 to always be overriden in the first loop
         best = (None, 2)
         for c in string.ascii_uppercase:
@@ -192,11 +206,14 @@ def break_cipher(encrypted: str) -> CubeCipher:
             chars = cube.decrypt_fast(letters)
             freqs = Counter(chars)
             
+            # compute error and if it lower than what previously found, save as best candidate
             error = mse(eng_freq, dict((c, freqs.get(c, 0) / len(chars)) for c in string.ascii_uppercase))
             if best[1] > error:
                 best = (c, error)
+        # save best key character
         key += best[0]
 
+    # construct a cube from the hacked key
     return CubeCipher.from_key(key)
 
 
