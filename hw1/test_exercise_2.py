@@ -19,7 +19,7 @@ def test_mse():
     assert mse(all_ones, all_ones) == 0.0
 
 def test_from_key():
-    key = "ABCDEFGHIJKL"
+    key = "ABCDEF"
     cube = CubeCipher.from_key(key)
 
     assert cube.get_key() == key

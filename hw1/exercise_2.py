@@ -7,6 +7,8 @@ from rubik.cube import Cube
 
 
 class CubeCipher:
+    key_length = 6
+
     def __init__(self, seed):
         self.seed = seed
 
@@ -15,10 +17,10 @@ class CubeCipher:
         """
         Given a key of length 12 constructs a CubeCipher with a proper seed.
         """
-        assert len(key) == 12
+        assert len(key) == CubeCipher.key_length
 
         # manually went through cube moves to see where each key lands
-        seed = f'{key[8]}!{key[10]}!!!!!{key[11]}{key[0]}!!!!{key[3]}{key[7]}!{key[6]}{key[2]}!{key[4]}!!!!!!!!!!!!!!!!!{key[1]}{key[9]}!!!!!!!{key[5]}!!!!!!'
+        seed = f'{key[4]}!!!!!!!{key[5]}{key[0]}!!!!{key[1]}{key[3]}!!!!{key[2]}!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
         return CubeCipher(seed)
 
 
@@ -37,9 +39,10 @@ class CubeCipher:
         cube = Cube(self.seed)
         res = ''
 
-        for _ in range(6):
+        for _ in range(CubeCipher.key_length // 2):
             self.sexy_move(cube)
             res += cube.get_piece(1, 1, -1).colors[1]
+            self.sexy_move(cube)
             res += cube.get_piece(1, 1, 1).colors[1]
         return res
     
@@ -111,13 +114,13 @@ def break_cipher(encrypted: str) -> CubeCipher:
     sexy move on a cube is an action cube's symmetry. Assuming an initial fixed seed of a cube and then
     performing the sexy move we generate new elements of the symmetry group. In fact, this group has order
     of 6. Indeed, performing the sexy move 6 times brings the cube back to its initial state. This means
-    we already know the length of a key: regardless of the seed the key is of length 6 * 2 = 12.
+    we already know the length of a key: regardless of the seed the key is of length 6.
 
     Knowing the key length allows us to skip the Kasiski test and just start breaking each key character one
-    by one. Every 12th character (with the consideration of skipped characters) is encrypted using the same
+    by one. Every 6th character (with the consideration of skipped characters) is encrypted using the same
     key character. We can consider each key character independently trying to find something that resembles
     the distribution of letter from English texts. We consider this key for each of the "quotient groups"
-    (every 12th character, every 12th+1 character, every 12th+2 character, etc). The key character that is
+    (every 6th character, every 6th+1 character, every 6th+2 character, etc). The key character that is
     closest to the letter frequencies is assumed to be the character used in the key. The metric for closest
     is the mean squared error.
     """
@@ -151,12 +154,11 @@ def break_cipher(encrypted: str) -> CubeCipher:
         'Y': 0.020,
         'Z': 0.0007,
     }
-    key_length = 12
 
     key = ''
 
-    for n in range(key_length):
-        # collect pos = n (mod 12) characters
+    for n in range(CubeCipher.key_length):
+        # collect pos = n (mod 6) characters
         letters = ''
         i = n
         while i < len(encrypted):
@@ -165,13 +167,13 @@ def break_cipher(encrypted: str) -> CubeCipher:
                 i += 1
             if i < len(encrypted):
                 letters += encrypted[i]
-                i += key_length
+                i += CubeCipher.key_length
         
         # max value of mse is 1, so we pick 2 to always be overriden in the first loop
         best = (None, 2)
         for c in string.ascii_uppercase:
             # try a seed of all c characters
-            cube = CubeCipher.from_key(c * 12)
+            cube = CubeCipher.from_key(c * CubeCipher.key_length)
             chars = cube.decrypt(letters)
             freqs = Counter(chars)
             
