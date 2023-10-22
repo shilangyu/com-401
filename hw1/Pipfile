@@ -5,6 +5,7 @@ name = "pypi"
 
 [packages]
 rubik-cube = "*"
+pycryptodome = "*"
 
 [dev-packages]
 
