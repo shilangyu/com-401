@@ -23,7 +23,6 @@ class CubeCipher:
         seed = f'{key[4]}!!!!!!!{key[5]}{key[0]}!!!!{key[1]}{key[3]}!!!!{key[2]}!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
         return CubeCipher(seed)
 
-
     @staticmethod
     def is_encryptable(s: str) -> bool:
         """
@@ -31,7 +30,7 @@ class CubeCipher:
         """
         assert len(s) == 1
         return s in string.ascii_uppercase
-    
+
     @staticmethod
     def caesar_shift(c: str, k: str, sign: int = 1) -> str:
         """
@@ -40,7 +39,7 @@ class CubeCipher:
         assert len(c) == 1
         assert len(k) == 1
         return chr((ord(c) + sign * ord(k)) % 26 + ord('A'))
-    
+
     def get_key(self) -> str:
         """
         Simulates moves of the cube to retrieve the key.
@@ -54,30 +53,31 @@ class CubeCipher:
             self.sexy_move(cube)
             res += cube.get_piece(1, 1, 1).colors[1]
         return res
-    
+
     def sexy_move(self, cube: Cube):
         cube.R()
         cube.U()
         cube.Ri()
         cube.Ui()
 
-
     # Maps a string with f using the cube cipher
+
     def _map_through_sexy_move(self, input: str, f: Callable[[str, str], str]):
         # Create a Rubik's Cube with the specified seed
         cube = Cube(self.seed)
 
         output = ""
-        pos = 0 # used for keeping track of the current position of the plaintext
-        
+        pos = 0  # used for keeping track of the current position of the plaintext
+
         while len(input) > len(output) + 1:
             # We encrypt two characters with the two characters we read from the cube
             # Hence, we keep track of this using char_count
-            char_count = 0 
+            char_count = 0
             while char_count != 2 and len(output) != len(input):
                 # We skip the characters that are not in string.ascii_uppercase
                 if not CubeCipher.is_encryptable(input[pos]):
-                    output += input[pos] # write the skipped characters to ct to preserve structure.
+                    # write the skipped characters to ct to preserve structure.
+                    output += input[pos]
                     pos += 1
                     continue
                 # Execute R U R' U'
@@ -85,9 +85,9 @@ class CubeCipher:
                 # Use upper right for the first character
                 if char_count == 0:
                     output += f(input[pos], cube.get_piece(1, 1, -1).colors[1])
-                else: # Use bottom right for the second character.
+                else:  # Use bottom right for the second character.
                     output += f(input[pos], cube.get_piece(1, 1, 1).colors[1])
-                
+
                 # Advance the positions
                 pos += 1
                 char_count += 1
@@ -103,15 +103,15 @@ class CubeCipher:
         while len(output) != len(input):
             output += input[pos]
             pos += 1
-        
+
         return output
 
     def encrypt(self, m: str) -> str:
         return self._map_through_sexy_move(m, CubeCipher.caesar_shift)
-    
+
     def decrypt(self, encrypted: str) -> str:
         return self._map_through_sexy_move(encrypted, lambda s, k: CubeCipher.caesar_shift(s, k, sign=-1))
-    
+
     def decrypt_fast(self, encrypted: str) -> str:
         """
         Runs a much faster equivalent algorithm to decrypt.
@@ -121,14 +121,17 @@ class CubeCipher:
         key_index = 0
         for i in range(len(encrypted)):
             if CubeCipher.is_encryptable(encrypted[i]):
-                output += CubeCipher.caesar_shift(encrypted[i], key[key_index], sign=-1)
+                output += CubeCipher.caesar_shift(
+                    encrypted[i], key[key_index], sign=-1)
                 key_index = (key_index + 1) % len(key)
             else:
                 output += encrypted[i]
         return output
-    
+
+
 def mse(xs: dict[str, float], ys: dict[str, float]) -> float:
     return 1/len(xs) * sum((xs[c] - ys[c]) ** 2 for c in string.ascii_uppercase)
+
 
 def break_cipher(encrypted: str) -> CubeCipher:
     """
@@ -148,7 +151,7 @@ def break_cipher(encrypted: str) -> CubeCipher:
     closest to the letter frequencies is assumed to be the character used in the key. The metric for closest
     is the mean squared error.
     """
-    
+
     # source: https://en.wikipedia.org/wiki/Letter_frequency
     eng_freq = {
         'A': 0.082,
@@ -179,14 +182,12 @@ def break_cipher(encrypted: str) -> CubeCipher:
         'Z': 0.0007,
     }
 
-
-
     # list of strings formed from characters such that pos = n (mod 6) characters
     quo_group = []
     # fill in initial data
     for _ in range(CubeCipher.key_length):
         quo_group.append('')
-    
+
     # collect letters
     key_index = 0
     for i in range(len(encrypted)):
@@ -205,9 +206,10 @@ def break_cipher(encrypted: str) -> CubeCipher:
             cube = CubeCipher.from_key(c * CubeCipher.key_length)
             chars = cube.decrypt_fast(letters)
             freqs = Counter(chars)
-            
+
             # compute error and if it lower than what previously found, save as best candidate
-            error = mse(eng_freq, dict((c, freqs.get(c, 0) / len(chars)) for c in string.ascii_uppercase))
+            error = mse(eng_freq, dict((c, freqs.get(c, 0) / len(chars))
+                        for c in string.ascii_uppercase))
             if best[1] > error:
                 best = (c, error)
         # save best key character
@@ -217,7 +219,6 @@ def break_cipher(encrypted: str) -> CubeCipher:
     return CubeCipher.from_key(key)
 
 
-        
 if __name__ == "__main__":
     seed1 = 'KKCVNCQDEPZJCPRHQUFRDQJWKMWHFIJHLACXZNBKDNZZEQHSXOFGUR'
     encrypted1 = 'WVDYN E AZWAVI PELTKP (HYH JYYAUQA QYTJV VP AWRW ZYVI ZW DKW) HTUHDGWZQN KRS JFYKQQCLUQ EQFXA SR IYH JRMBEHF MPDJH HLSKV KLB: XWVQ, ZKCXEJ AY LTIVLVJ IYLZ SW QZOS, CLT XDCO SCV VOKVE BLJU, ECU ZHSXTU WV CIT NKHD ADLOK REEGHU XIMK.  WOO JXIVA DLXEJ ZRI WVDYN APJ D NORTIDS MLDIXZ YJ IYHYO KDVV ISPA! KKLX XWV UHLFXKV CYMRV DSYRV--TDAML WZP, FYY QP WOO LTUJL! DLTE VPVICTH, HXH IYHU KRDKKLB GDEIBCMDE RM FSXTHZ--RSAU XW RMH YHHN--FGRQKI RDN--GVXX RYRRO LXD--KVG APJ LA, YPS WHSVSL? NKHD LPGSLXIS KR FYY? IVOS EW PCO HLSJK LA!  VEHK FHWI P CLADPT WHLLPT, JTBOEZZQN FSXTH, (AREIJ EPVP, IYRBQLI ROPMI,) LVOS, S LPIGSI OCFZ--UY QDIH, ARECB BL; SQ QVWAOV CFZ--IEX XD D KOEA KRV PPJJWLBIS KR AOPA PRB--KPA Z NUYA XJ, VVWIIYLUQ GDDHZ KX BV OPUI P ADJU-MC-KKL-LSM, RQK ET X XRLC PXBH H CON-IRJUII!  JR FYY SZG, VVH UVOSYA! HRLK DLT FWOOVH.  NH TEWI SXYX XWV KVEWT URDX! WPZG ARI GREISXH MRPMI; PEG HVMRV FHVPTU RBD EH CRBN EH JKL MSJCG, PP CDL GV. SPA JHA NMCRK HD CDL!  WOOVT NDZ K HTRG ZSPTEFL SRHKDUDPN, RQK KPXTH ARSJXKA DS WVUZOPU, Z ZVXHTI ZOKX IYHF GMAC GV XIMK! LM DLTP KHN ECP VLXWT, KKLIH IRNL DLT IRVP SUW. DMDIG R PPXYIV RY DAD, KKLI FTXDU WSKZQN KFDLW HQEXE, DUN EAZFL RIPIG ARI GREISX HRB, H LEGI'
@@ -234,4 +235,5 @@ if __name__ == "__main__":
     cube2 = break_cipher(encrypted2)
     m2 = cube2.decrypt(encrypted2)
     assert hashlib.sha256(m2.encode()).hexdigest() == checksum2
-    print(f'Question 2.2: {m2}')
+    print(f'Question 2.2 key: {cube2.get_key()}')
+    print(f'Question 2.2 message: {m2}')
