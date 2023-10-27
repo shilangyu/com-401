@@ -3,3 +3,4 @@ bin/
 .vscode/
 pyvenv.cfg
 lib/
+.DS_Store
