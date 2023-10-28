@@ -71,6 +71,8 @@ def find_possible_keys(solutions: list[tuple[int, int]], cts: list[int], n: int,
                     already_found = True
                     m = (j - k_exp_mod - 2*(i+1)) % len(g_pow_values)
                     key |= m << (i*2)
+            if not already_found:
+                print('could not find a key part')
         keys.add(key)
     return keys
 
