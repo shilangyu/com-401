@@ -57,7 +57,7 @@ def find_kexp_and_fixed_bits(g: int, p: int, n: int, known_pt: int, known_cts: l
     return (g_pow_values, solutions)
 
 
-def find_possible_keys(solutions: list[tuple[int, int]], cts: list[int], n: int) -> set[int]:
+def find_possible_keys(solutions: list[tuple[int, int]], cts: list[int], n: int, g_pow_values: list[int]) -> set[int]:
     keys = set()
     for (k_exp_mod, fixed) in solutions:
         key = 0
@@ -98,10 +98,10 @@ if __name__ == "__main__":
 
     g_pow_values, solutions = find_kexp_and_fixed_bits(
         g, p, n, known_pt, known_cts)
-    known_keys = find_possible_keys(solutions, known_cts, n)
+    known_keys = find_possible_keys(solutions, known_cts, n, g_pow_values)
     assert known_keys == set([known_pt])
 
-    keys = find_possible_keys(solutions, cts, n)
+    keys = find_possible_keys(solutions, cts, n, g_pow_values)
 
     for key in keys:
         decrypted = decrypt(ct_aes, tag, nonce, key)
