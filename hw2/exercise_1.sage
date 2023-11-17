@@ -98,7 +98,6 @@ if __name__ == "__main__":
     #         print(Ek.random_point() in E)
     #     except:
     #         pass
-        
     # exit(0)
 
     # Ek is finite, we need an N such that N.S1 = N.S2 = 0, trivially we can set N to the order of Ek
