@@ -31,7 +31,7 @@ def lemma1(E: EllipticCurve, P: "EllipticCurvePoint", Q: "EllipticCurvePoint") -
 
 def MOV(params: list[int], p: int, P: tuple[int, int], Q: tuple[int, int]) -> int:
     """
-    Solves Q = nP for n. From https://crypto.stanford.edu/pbc/notes/elliptic/movattack.html
+    Solves Q = nP for n. From https://crypto.stanford.edu/pbc/notes/elliptic/movattack.html and https://risencrypto.github.io/WeilMOV/
     """
     E = EllipticCurve(GF(p), params)
     k = embedding_degree(E)
