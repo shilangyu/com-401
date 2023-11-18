@@ -31,7 +31,7 @@ def lemma1(E: EllipticCurve, P: "EllipticCurvePoint", Q: "EllipticCurvePoint") -
 
 def MOV(params: list[int], p: int, P: tuple[int, int], Q: tuple[int, int]) -> int:
     """
-    Solves Q = nP for n. From https://crypto.stanford.edu/pbc/notes/elliptic/movattack.html and https://risencrypto.github.io/WeilMOV/
+    Solves Q = nP for n. From https://people.cs.nycu.edu.tw/~rjchen/ECC2009/19_MOVattack.pdf
     """
     E = EllipticCurve(GF(p), params)
     k = embedding_degree(E)
@@ -39,38 +39,37 @@ def MOV(params: list[int], p: int, P: tuple[int, int], Q: tuple[int, int]) -> in
     Ek = EllipticCurve(F, params)
 
 
-    P = E(*P)
-    Q = E(*Q)
+    P = Ek(*P)
+    Q = Ek(*Q)
+    N = P.order()
     assert lemma1(E, P, Q) # otherwise the discrete log does not exist
 
-    N = P.order()
-    # we want such an R of order N that there does not exist an n such that R = nP. We use the lemma to see if such n exists.
-    R = None
-    m = E.order()
-    n = Ek.order()
-    for _ in range(1, 1000000):
-        temp = Ek.random_point()
-        if True or not temp in E:
-            S = (n / m) * temp
-            # print(temp)
-            # print(S)
-            if S.order() != 1:
-                R = S
-                break
-    print('found R')
-    if R == None:
-        raise RuntimeError('Could not find a point for MOV') 
+    # try to find various discrete log solutions and merge afterwards
+    ds = set()
+    for _ in range(1, 10000):
+        T = Ek.random_point()
+        M = T.order()
+        d = gcd(M, N)
+        if lcm(ds) == lcm([*ds, d]):
+            # no point in doing, does not make progress towards N
+            continue
+        ds.add(d)
+        R = (M/d) * T
         
-    assert not lemma1(E, P, R)
-    
-    u = P.weil_pairing(R, N)
-    v = Q.weil_pairing(R, N)
+        u = P.weil_pairing(R, N)
+        v = Q.weil_pairing(R, N)
 
-    n = discrete_log(v, u)
+        n = discrete_log(v, u)
 
-    assert n * P == Q
+        # HACK: no clue how to join results from many (d, n) pairs. So we look for a single pair that solves the DL
+        if E(P) * n == E(Q):
+            return n
 
-    return n
+        if lcm(ds) == N:
+            # break out and merge n results
+            break
+
+    # TODO: merge (d, n) results into the answer
 
 
 if __name__ == "__main__":
@@ -92,13 +91,6 @@ if __name__ == "__main__":
 
     S1 = Ek(*Q1b_S1)
     S2 = Ek(*Q1b_S2)
-
-    # for _ in range(1, 10000):
-    #     try:
-    #         print(Ek.random_point() in E)
-    #     except:
-    #         pass
-    # exit(0)
 
     # Ek is finite, we need an N such that N.S1 = N.S2 = 0, trivially we can set N to the order of Ek
     weil = S1.weil_pairing(S2, Ek.order())
