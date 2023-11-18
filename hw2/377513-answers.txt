@@ -1,0 +1,13 @@
+# SCIPER = 377513
+# id = 377513
+# seed = 8382404771215940171
+# Worked with (list all):
+###### Exercise 1
+Q1a_k=
+Q1b_e=
+Q1b_n=
+###### Exercise 2
+Q2a_rmult=
+###### Exercise 3
+Q3a_x=
+Q3b_pt=
