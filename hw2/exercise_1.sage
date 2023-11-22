@@ -59,7 +59,7 @@ def MOV(params: list[int], p: int, P: tuple[int, int], Q: tuple[int, int]) -> in
         u = P.weil_pairing(R, N)
         v = Q.weil_pairing(R, N)
 
-        n = discrete_log(v, u)
+        n = v.log(u)
 
         # HACK: no clue how to join results from many (d, n) pairs. So we look for a single pair that solves the DL
         if E(P) * n == E(Q):
