@@ -45,5 +45,19 @@ def q3a() -> list[int]:
     return sorted(roots)
 
 
+def q3b():
+    e = 3
+    
+    # use assumption 3: low entropy of primes
+    common_primes = set(filter(lambda x: x != 1, (gcd(x, Q3b_N) for x in Q3b_PKS)))
+    assert len(common_primes) == 1
+    p1 = common_primes.pop()
+
+    # find glitched pair
+    glitched = [(x, y) for x, y in Q3b_PAIRS if x != y]
+    assert len(glitched) == 1
+    x1, x2 = glitched[0]
+
 if __name__ == "__main__":
     print(f"Question 3.1: {q3a()}")
+    print(f"Question 3.2: {q3b()}")
