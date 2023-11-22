@@ -6,8 +6,8 @@ Modify `exercise_1.sage` with your input data and run with `sage exercise_1.sage
 
 ## exercise 2
 
-Modify `exercise_2.py` with your input data and run with `pipenv run python exercise_2.py`.
+Modify `exercise_2.py` with your input data and run with `sage exercise_2.sage`.
 
-## exercise 3
+## exercise 2
 
-TODO
+Modify `exercise_3.py` with your input data and run with `sage exercise_3.sage`.
