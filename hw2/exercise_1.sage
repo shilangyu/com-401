@@ -38,11 +38,10 @@ def MOV(params: list[int], p: int, P: tuple[int, int], Q: tuple[int, int]) -> in
     F.<y> = GF((p, k))
     Ek = EllipticCurve(F, params)
 
-
     P = Ek(*P)
     Q = Ek(*Q)
     N = P.order()
-    assert lemma1(E, P, Q) # otherwise the discrete log does not exist
+    assert lemma1(E, P, Q)  # otherwise the discrete log does not exist
 
     # try to find various discrete log solutions and merge afterwards
     ds = set()
@@ -54,8 +53,8 @@ def MOV(params: list[int], p: int, P: tuple[int, int], Q: tuple[int, int]) -> in
             # no point in doing, does not make progress towards N
             continue
         ds.add(d)
-        R = (M/d) * T
-        
+        R = (M / d) * T
+
         u = P.weil_pairing(R, N)
         v = Q.weil_pairing(R, N)
 
@@ -73,28 +72,31 @@ def MOV(params: list[int], p: int, P: tuple[int, int], Q: tuple[int, int]) -> in
 
 
 if __name__ == "__main__":
-    Q1_param=[-35, 98]
-    Q1_p=434252269029337012720086440207
-    Q1_P=(16378704336066569231287640165, 377857010369614774097663166640)
-    Q1_Q=(429232528000613182403739134488, 373273367618177537099469237857)
+    Q1_param = [-35, 98]
+    Q1_p = 434252269029337012720086440207
+    Q1_P = (16378704336066569231287640165, 377857010369614774097663166640)
+    Q1_Q = (429232528000613182403739134488, 373273367618177537099469237857)
 
     E = EllipticCurve(GF(Q1_p), Q1_param)
     k = embedding_degree(E)
 
-    print(f'Question 1.1: {k}')
+    print(f"Question 1.1: {k}")
 
     F.<y> = GF((Q1_p, k))
     Ek = EllipticCurve(F, Q1_param)
 
-    Q1b_S1=(16378704336066569231287640165, 377857010369614774097663166640)
-    Q1b_S2=(70537032201908735903640201134*y + 112916464356536482203722151790, 61270675842937552626945489624*y + 261740183693532755354980023566)
+    Q1b_S1 = (16378704336066569231287640165, 377857010369614774097663166640)
+    Q1b_S2 = (
+        70537032201908735903640201134 * y + 112916464356536482203722151790,
+        61270675842937552626945489624 * y + 261740183693532755354980023566,
+    )
 
     S1 = Ek(*Q1b_S1)
     S2 = Ek(*Q1b_S2)
 
     # Ek is finite, we need an N such that N.S1 = N.S2 = 0, trivially we can set N to the order of Ek
     weil = S1.weil_pairing(S2, E.order())
-    print(f'Question 1.2: {weil}')
+    print(f"Question 1.2: {weil}")
 
     n = MOV(Q1_param, Q1_p, Q1_P, Q1_Q)
-    print(f'Question 1.3: {n}')
+    print(f"Question 1.3: {n}")
