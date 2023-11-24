@@ -93,7 +93,7 @@ if __name__ == "__main__":
     S2 = Ek(*Q1b_S2)
 
     # Ek is finite, we need an N such that N.S1 = N.S2 = 0, trivially we can set N to the order of Ek
-    weil = S1.weil_pairing(S2, Ek.order())
+    weil = S1.weil_pairing(S2, E.order())
     print(f'Question 1.2: {weil}')
 
     n = MOV(Q1_param, Q1_p, Q1_P, Q1_Q)
